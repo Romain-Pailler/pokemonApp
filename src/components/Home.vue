@@ -4,16 +4,14 @@
       <input type="text" v-model="nomPokemon" placeholder="Recherchez votre pokemon favori !">
       <button @click="search">Chercher</button>
   
-      <!-- Grille des Pokémon -->
       <div class="pokemon-grid">
         <div class="pokemon-card" v-for="pokemon in pokemons" :key="pokemon.id">
-          <img :src="pokemon.image" :alt="pokemon.name" class="pokemon-image" />
-          <h2>{{ pokemon.name }}</h2>
+            <img :src="pokemon.image" :alt="pokemon.name" class="pokemon-image"/>
+          <h2 @click="goToDetails(pokemon.name)">{{ pokemon.name }}</h2>
           <p>Prix : {{ pokemon.price }}</p>
         </div>
       </div>
   
-      <!-- Navigation avec flèches -->
       <div class="navigation">
         <button v-if="endpoint.previous" @click="previous" class="nav-button">&lt;</button>
         <button v-if="endpoint.next" @click="next" class="nav-button">&gt;</button>
@@ -27,13 +25,13 @@
   export default {
     data() {
       return {
-        pokemons: [], // Liste des Pokémon avec détails
+        pokemons: [],
         endpoint: {},
         nomPokemon: ''
       };
     },
     async mounted() {
-      await this.fetchPokemons("pokemon"); // Charger les Pokémon à partir de l'API
+      await this.fetchPokemons('pokemon');
     },
     methods: {
         async fetchPokemons(endpoint) {
@@ -93,10 +91,12 @@
                 },
           ];
             } catch (error) {
-                
+                console.error(error);
             }
-            
-        }
+        },
+        goToDetails(pokemonName) {
+          this.$router.push({name:'Pokemon',params: { name: pokemonName } });
+        },
         },
     };
 </script>
