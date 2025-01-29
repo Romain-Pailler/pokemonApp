@@ -4,17 +4,20 @@
     <div class="pokemon-card">
         <img :src="pokemon.sprites.front_default" :alt="pokemon.name" class="pokemon-image"/>
       <h2>{{ pokemon.name }}</h2>
-      <p>Prix : {{ pokemon.base_experience }}</p>
+      <p>{{ pokemon.base_experience }}</p>
         <div v-for="type in pokemon.types">{{type.type.name}}</div>
         <p> taille : {{pokemon.height}} cm</p>
         <p>poids : {{pokemon.weight}} cm</p>
         <p>id {{pokemon.id}}</p>
         <div v-for="stat in pokemon.stats">{{stat.stat.name}} = {{stat.base_stat}}</div>
+        <button @click="addToCart(pokemon)"> Ajouter dans le panier</button>
     </div>
 </div>
 </template>
 <script>
 import { getPoke } from '@/services/httpClient';
+import { useCounterStore } from '@/stores/store';
+import { mapActions } from 'pinia';
 
 
 export default {
@@ -22,11 +25,14 @@ export default {
         return{
             pokemonName: this.$route.params.name,
             pokemon: undefined,
-
+            cartStore: useCounterStore(),
         }
     },
     async mounted(){
         this.pokemon = await getPoke(`pokemon/${this.pokemonName}`);
+    },
+    methods: {
+        ...mapActions(useCounterStore,['addToCart'])
     }
 }
 </script>
