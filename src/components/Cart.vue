@@ -1,6 +1,6 @@
 <template>
     <h1>Mon panier</h1>
-    <div>
+    <div v-if="count > 0">
         <p>Nombre de Pokémon : {{ count }}</p>
         <p>Prix total : {{ allPrices }} €</p>
         <div v-for="pokemon in pokemons" :key="pokemon.id" class="cart-item">
@@ -12,6 +12,10 @@
             <button @click="deleteToCart(pokemon)">➖</button>
             <button @click="addToCart(pokemon)">➕</button>
         </div>
+        <button @click="$router.push('/Confirmation')">Valider mon panier</button>
+    </div>
+    <div v-else>
+        Le panier est vide
     </div>
 </template>
 

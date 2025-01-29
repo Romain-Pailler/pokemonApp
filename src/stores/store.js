@@ -3,7 +3,8 @@ import { defineStore } from "pinia";
 export const useCounterStore = defineStore("counter", {
     state: () => ({
         count: 0, // Nombre total de Pokémon dans le panier
-        pokemons: [] // Liste des Pokémon avec leur quantité
+        pokemons: [], // Liste des Pokémon avec leur quantité
+        orders: [] //historique des commandes
     }),
     actions: {
         addToCart(pokemon) {
@@ -31,6 +32,15 @@ export const useCounterStore = defineStore("counter", {
         },
         decrement() {
             if (this.count > 0) this.count--;
+        },
+        confirmOrder(){
+            this.orders.push({
+                id: Date.now(),
+                items:[...this.pokemons],
+                date: new Date().toLocaleTimeString()
+            });
+            this.pokemons = [];
+            this.count = 0;
         }
     },
     getters: {
