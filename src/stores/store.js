@@ -68,8 +68,8 @@ export const pokemonsStore = defineStore("pokemon", {
         getPoke(name) {  // 🔹 Recherche par nom
             return this.pokemons.find((p) => p.name.toLowerCase() === name.toLowerCase());
         },
-        printPokes() {
-            console.log("Pokémons en cache :", this.pokemons);
+        getAllPokes() {
+            return this.pokemons;
         }
     },
     getters: {

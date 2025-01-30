@@ -38,10 +38,14 @@ export default {
     await this.fetchPokemonData('pokemon');
   },
   methods: {
-    ...mapActions(pokemonsStore, ["addPoke"]),
+    ...mapActions(pokemonsStore, ["addPoke","getAllPokes"]),
     async fetchPokemonData(endpoint) {
       try {
         const store = pokemonsStore(); 
+        if(store.getAllPokes().length > 0){
+          this.pokemons = store.getAllPokes();
+        }else{
+
         // Vérifie si la recherche concerne un Pokémon unique ou une liste
         if (endpoint.startsWith("pokemon/")) {
           const response = await fetch(`https://pokeapi.co/api/v2/${endpoint}`);
@@ -66,9 +70,11 @@ export default {
             })
           );
         }
+      }
       } catch (error) {
         console.error("Erreur lors de la récupération des Pokémon :", error);
       }
+      
     },
 
     formatPokemonData(detailsPoke) {
@@ -81,7 +87,9 @@ export default {
         isShiny: false,
         shiny_gif: detailsPoke.sprites.other.showdown.front_shiny,
         price: detailsPoke.base_experience,
-        stats: detailsPoke.stats
+        stats: detailsPoke.stats,
+        height: detailsPoke.height,
+        weight: detailsPoke.weight
       };
     },
 
