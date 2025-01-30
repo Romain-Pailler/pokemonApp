@@ -18,15 +18,15 @@
 </template>
 
 <script>
-import { useCounterStore } from '@/stores/store';
+import { cartStore } from '@/stores/store';
 import { mapActions, mapState } from 'pinia';
 
 export default {
     computed: {
-        ...mapState(useCounterStore, ['pokemons', 'allPrices']),
+        ...mapState(cartStore, ['pokemons', 'allPrices']),
     },
     methods: {
-        ...mapActions(useCounterStore, ['confirmOrder']),
+        ...mapActions(cartStore, ['confirmOrder']),
         modalConfirmOrder() {
             if (confirm("Êtes-vous sûr de vouloir valider votre commande ?")) {
                 this.confirmOrder();

@@ -20,15 +20,15 @@
 </template>
 
 <script>
-import { useCounterStore } from "@/stores/store";
+import { cartStore } from "@/stores/store";
 import { mapActions, mapState } from "pinia";
 
     export default {
     computed: {
-        ...mapState(useCounterStore, ["count", "pokemons", "allPrices"]),
+        ...mapState(cartStore, ["count", "pokemons", "allPrices"]),
     },
     methods: {
-        ...mapActions(useCounterStore, ["addToCart", "deleteToCart"]),
+        ...mapActions(cartStore, ["addToCart", "deleteToCart"]),
     },
     };
 </script>

@@ -6,23 +6,8 @@
   
       <div class="pokemon-grid">
         <div class="pokemon-card" v-for="pokemon in pokemons" :key="pokemon.id">
-          <!-- Conteneur de l'image principale -->
-          <img :src="pokemon.image" :alt="pokemon.name" class="pokemon-image" @click="changeShiny(pokemon)" v-if="!pokemon.isShiny"/>
-          <img :src="pokemon.shiny" :alt="pokemon.name" class="pokemon-image" @click="changeShiny(pokemon)" v-if="pokemon.isShiny"/>
-        
-          <!-- Image "pokeball" affichée en haut à droite si dans le panier -->
-          <img 
-            v-if="isInCart(pokemon.id)" 
-            src="@/assets/pokeball.png" 
-            alt="Déjà dans le panier" 
-            class="pokemon-icon" 
-          />
-        
-          <!-- Informations de la carte -->
-          <h2 @click="goToDetails(pokemon.name)">{{ pokemon.name }}</h2>
-          <p>Prix : {{ pokemon.price }}</p>
+          <Pokemon :pokemon="pokemon"/>
         </div>
-        
       </div>
   
       <div class="navigation">
@@ -33,95 +18,98 @@
   </template>
   
   <script>
-  import { getPoke } from "@/services/httpClient";
-import { useCounterStore } from "@/stores/store";
-import { mapState } from "pinia";
-  
-  export default {
-    data() {
+import { getPoke } from "@/services/httpClient";
+import { pokemonsStore } from "@/stores/store";
+import { mapActions } from "pinia";
+import Pokemon from "./Pokemon.vue";
+
+export default {
+  components: {
+    Pokemon
+  },
+  data() {
+    return {
+      pokemons: [],
+      endpoint: {},
+      nomPokemon: '',
+    };
+  },
+  async mounted() {
+    await this.fetchPokemonData('pokemon');
+  },
+  methods: {
+    ...mapActions(pokemonsStore, ["addPoke"]),
+    async fetchPokemonData(endpoint) {
+      try {
+        const store = pokemonsStore(); 
+        // Vérifie si la recherche concerne un Pokémon unique ou une liste
+        if (endpoint.startsWith("pokemon/")) {
+          const response = await fetch(`https://pokeapi.co/api/v2/${endpoint}`);
+          if (!response.ok) {
+            throw new Error(`Erreur lors du chargement de ${endpoint}`);
+          }
+          const detailsPoke = await response.json();
+          this.pokemons = [this.formatPokemonData(detailsPoke)];
+          store.addPoke(this.pokemons);
+        } else {
+          this.endpoint = await getPoke(`${endpoint}`);
+          this.pokemons = await Promise.all(
+            this.endpoint.results.map(async (pokemon) => {
+              const response = await fetch(pokemon.url);
+              if (!response.ok) {
+                throw new Error(`Erreur lors du chargement de ${pokemon.name}`);
+              }
+              const detailsPoke = await response.json();
+              const pokemonFormated = this.formatPokemonData(detailsPoke)
+              store.addPoke(pokemonFormated);
+              return pokemonFormated;
+            })
+          );
+        }
+      } catch (error) {
+        console.error("Erreur lors de la récupération des Pokémon :", error);
+      }
+    },
+
+    formatPokemonData(detailsPoke) {
       return {
-        pokemons: [],
-        endpoint: {},
-        nomPokemon: '',
+        id: detailsPoke.id,
+        name: detailsPoke.name,
+        image_gif: detailsPoke.sprites.other.showdown.front_default,
+        image_artwork: detailsPoke.sprites.other.dream_world.front_default,
+        image_default: detailsPoke.sprites.front_default,
+        isShiny: false,
+        shiny_gif: detailsPoke.sprites.other.showdown.front_shiny,
+        price: detailsPoke.base_experience,
+        stats: detailsPoke.stats
       };
     },
-    async mounted() {
-      await this.fetchPokemons('pokemon');
+
+    async next() {
+      if (this.endpoint.next) {
+        const nextEndpoint = this.endpoint.next.replace("https://pokeapi.co/api/v2/", "");
+        await this.fetchPokemonData(nextEndpoint);
+      }
     },
-    computed:{
-      ...mapState(useCounterStore,['isInCart'])
+
+    async previous() {
+      if (this.endpoint.previous) {
+        const prevEndpoint = this.endpoint.previous.replace("https://pokeapi.co/api/v2/", "");
+        await this.fetchPokemonData(prevEndpoint);
+      }
     },
-    methods: {
-        async fetchPokemons(endpoint) {
-        try {
-            this.endpoint = await getPoke(`${endpoint}`);
-            this.pokemons = await Promise.all(
-            this.endpoint.results.map(async (pokemon) => {
-                const response = await fetch(pokemon.url);
-                if (!response.ok) {
-                throw new Error(`Erreur lors du chargement de ${pokemon.name}`);
-                }
-                const detailsPoke = await response.json();
-                return {
-                id: detailsPoke.id,
-                name: detailsPoke.name,
-                image: detailsPoke.sprites.other.showdown.front_default,
-                isShiny: false,
-                shiny:detailsPoke.sprites.other.showdown.front_shiny,
-                price: detailsPoke.base_experience,
-                };
-            })
-            );
-        } catch (error) {
-            console.error("Erreur lors de la récupération des Pokémon :", error);
-        }
-        },
-        async next() {
-            if (this.endpoint.next) {
-            const nextEndpoint = this.endpoint.next.replace("https://pokeapi.co/api/v2/", "");
-            await this.fetchPokemons(nextEndpoint);
-        }
-        },
-        async previous() {
-        if (this.endpoint.previous) {
-            const prevEndpoint = this.endpoint.previous.replace("https://pokeapi.co/api/v2/", "");
-            await this.fetchPokemons(prevEndpoint);
-                }
-            },
-        async search(){
-            if (this.nomPokemon) {
-                await this.fetchOnePokemon(`pokemon/${this.nomPokemon}`);
-            }else{
-                await this.fetchPokemons("pokemon");
-            }
-            
-        },
-        async fetchOnePokemon(endpoint){
-            try {
-                this.endpoint = await getPoke(endpoint);
-                this.pokemons = [
-                {
-                id: this.endpoint.id,
-                name: this.endpoint.name,
-                image: this.endpoint.sprites.other.showdown.front_default,
-                isShiny: false,
-                shiny:this.endpoint.sprites.other.showdown.front_shiny,
-                price: this.endpoint.base_experience,
-                },
-          ];
-            } catch (error) {
-                console.error(error);
-            }
-        },
-        goToDetails(pokemonName) {
-          this.$router.push({name:'Pokemon',params: { name: pokemonName } });
-        },
-        changeShiny(pokemon){
-          pokemon.isShiny = !pokemon.isShiny;
-        }
-        },
-    };
+
+    async search() {
+      if (this.nomPokemon) {
+        await this.fetchPokemonData(`pokemon/${this.nomPokemon.toLowerCase()}`);
+      } else {
+        await this.fetchPokemonData("pokemon");
+      }
+    }
+  },
+};
 </script>
+
 <style scoped>
 .pokemon-container {
   font-family: Arial, sans-serif;
@@ -134,32 +122,6 @@ import { mapState } from "pinia";
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   margin: 20px auto;
-}
-
-.pokemon-card {
-  position: relative; /* Positionnement parent pour icône */
-  background: #f9f9f9;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 15px;
-  text-align: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  overflow: hidden; /* Assure que tout reste dans la carte */
-}
-
-.pokemon-image {
-  max-width: 100px;
-  margin-bottom: 10px;
-}
-
-.pokemon-icon {
-  position: absolute; /* Position absolue par rapport au parent */
-  top: 10px; /* Décalage par rapport au haut */
-  right: 10px; /* Décalage par rapport à la droite */
-  width: 30px;
-  height: 30px;
-  object-fit: contain;
-  z-index: 10; /* Assure que l'icône est visible au-dessus de tout */
 }
 
 .navigation {

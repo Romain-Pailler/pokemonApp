@@ -7,6 +7,7 @@
         <div v-else>
             <div v-for="order in orders" :key="order.id" class="order-card">
                 <p>Commande du {{ order.date }}</p>
+                <p> Prix {{order.price}}</p>
                 <ul>
                     <li v-for="pokemon in order.items" :key="pokemon.id">
                         {{ pokemon.name }} - {{ pokemon.quantity }}x ({{ pokemon.base_experience * pokemon.quantity }}€)
@@ -19,12 +20,12 @@
 </template>
 
 <script>
-import { useCounterStore } from '@/stores/store';
+import { cartStore } from '@/stores/store';
 import { mapState } from 'pinia';
 
 export default {
     computed: {
-        ...mapState(useCounterStore, ['orders']),
+        ...mapState(cartStore, ['orders']),
     }
 };
 </script>

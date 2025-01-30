@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 
-export const useCounterStore = defineStore("counter", {
+export const cartStore = defineStore("cart", {
     state: () => ({
         count: 0, // Nombre total de Pokémon dans le panier
         pokemons: [], // Liste des Pokémon avec leur quantité
@@ -52,5 +52,29 @@ export const useCounterStore = defineStore("counter", {
         isInCart: (state) => (id) => {
             return state.pokemons.some((pokemon) => pokemon.id === id);
     }
+    }
+});
+
+export const pokemonsStore = defineStore("pokemon", {
+    state: () => ({
+        pokemons: [], // Liste des Pokémon déjà chargés
+    }),
+    actions: {
+        addPoke(pokemon) {
+            if (!this.isInStore(pokemon.name)) {
+                this.pokemons.push({ ...pokemon });
+            }
+        },
+        getPoke(name) {  // 🔹 Recherche par nom
+            return this.pokemons.find((p) => p.name.toLowerCase() === name.toLowerCase());
+        },
+        printPokes() {
+            console.log("Pokémons en cache :", this.pokemons);
+        }
+    },
+    getters: {
+        isInStore: (state) => (name) => {
+            return state.pokemons.some((pokemon) => pokemon.name.toLowerCase() === name.toLowerCase());
+        }
     }
 });
