@@ -38,13 +38,9 @@ export default {
     await this.fetchPokemonData('pokemon');
   },
   methods: {
-    ...mapActions(pokemonsStore, ["addPoke","getAllPokes"]),
     async fetchPokemonData(endpoint) {
       try {
         const store = pokemonsStore(); 
-        if(store.getAllPokes().length > 0){
-          this.pokemons = store.getAllPokes();
-        }else{
 
         // Vérifie si la recherche concerne un Pokémon unique ou une liste
         if (endpoint.startsWith("pokemon/")) {
@@ -70,7 +66,6 @@ export default {
             })
           );
         }
-      }
       } catch (error) {
         console.error("Erreur lors de la récupération des Pokémon :", error);
       }

@@ -7,7 +7,7 @@
         <div v-else>
             <ul>
                 <li v-for="pokemon in pokemons" :key="pokemon.id">
-                    {{ pokemon.name }} - {{ pokemon.quantity }}x ({{ pokemon.base_experience * pokemon.quantity }}€)
+                    {{ pokemon.name }} - {{ pokemon.quantity }}x ({{ pokemon.price * pokemon.quantity }}€)
                 </li>
             </ul>
             <p>Total : {{ allPrices }}€</p>

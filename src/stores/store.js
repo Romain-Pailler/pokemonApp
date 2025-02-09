@@ -46,7 +46,7 @@ export const cartStore = defineStore("cart", {
     getters: {
         allPrices() {
             return this.pokemons.reduce(
-                (total, pokemon) => total + pokemon.base_experience * pokemon.quantity,0
+                (total, pokemon) => total + pokemon.price * pokemon.quantity,0
             );
         },
         isInCart: (state) => (id) => {
@@ -66,15 +66,15 @@ export const pokemonsStore = defineStore("pokemon", {
             }
         },
         getPoke(name) {  // 🔹 Recherche par nom
-            return this.pokemons.find((p) => p.name.toLowerCase() === name.toLowerCase());
+            return this.pokemons.find((p) => p.name === name);
         },
-        getAllPokes() {
-            return this.pokemons;
+        printPokes() {
+            console.log("Pokémons en cache :", this.pokemons);
         }
     },
     getters: {
         isInStore: (state) => (name) => {
-            return state.pokemons.some((pokemon) => pokemon.name.toLowerCase() === name.toLowerCase());
+            return state.pokemons.some((pokemon) => pokemon.name === name);
         }
     }
 });

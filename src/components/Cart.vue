@@ -5,8 +5,8 @@
         <p>Prix total : {{ allPrices }} €</p>
         <div v-for="pokemon in pokemons" :key="pokemon.id" class="cart-item">
             <p>
-                <img :src="pokemon.sprites.other.showdown.front_default" :alt="pokemon.name" class="cart-image" />
-                <strong>{{ pokemon.name }}</strong> - Prix : {{ pokemon.base_experience }} €
+                <img :src="pokemon.image_gif" :alt="pokemon.name" class="cart-image" />
+                <strong>{{ pokemon.name }}</strong> - Prix : {{ pokemon.price }} €
             </p>
             <p>Quantité : {{ pokemon.quantity }}</p>
             <button @click="deleteToCart(pokemon)">➖</button>
