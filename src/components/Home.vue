@@ -1,32 +1,56 @@
 <template>
-    <div class="pokemon-container">
-      <h1>Liste des Pokémons</h1>
-      <input type="text" v-model="nomPokemon" placeholder="Recherchez votre pokemon favori !">
-      <button @click="search">Chercher</button>
-  
-      <div class="pokemon-grid">
-        <div class="pokemon-card" v-for="pokemon in pokemons" :key="pokemon.id">
-          <Pokemon :pokemon="pokemon"/>
-        </div>
-      </div>
-  
-      <div class="navigation">
-        <button v-if="endpoint.previous" @click="previous" class="nav-button">&lt;</button>
-        <button v-if="endpoint.next" @click="next" class="nav-button">&gt;</button>
+  <div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-center mb-8">Liste des Pokémons</h1>
+
+    <!-- Barre de recherche -->
+    <div class="flex gap-4 justify-center mb-8">
+      <input 
+        type="text" 
+        v-model="nomPokemon" 
+        placeholder="Recherchez votre pokemon favori !" 
+        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none w-full max-w-md"
+      >
+      <button 
+        @click="search"
+        class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 active:bg-blue-700"
+      >
+        Chercher
+      </button>
+    </div>
+
+    <!-- Grille -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 lg:gap-8">
+      <div v-for="pokemon in pokemons" :key="pokemon.id">
+        <Pokemon :pokemon="pokemon"/>
       </div>
     </div>
-  </template>
-  
-  <script>
+
+    <!-- Navigation -->
+    <div class="flex justify-center items-center gap-4 mt-8">
+      <button 
+        v-if="endpoint.previous" 
+        @click="previous"
+        class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 active:bg-blue-700"
+      >
+        &lt;
+      </button>
+      <button 
+        v-if="endpoint.next" 
+        @click="next"
+        class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 active:bg-blue-700"
+      >
+        &gt;
+      </button>
+    </div>
+  </div>
+</template>
+
+<script>
 import { getPoke } from "@/services/httpClient";
-import { pokemonsStore } from "@/stores/store";
-import { mapActions } from "pinia";
 import Pokemon from "./Pokemon.vue";
 
 export default {
-  components: {
-    Pokemon
-  },
+  components: { Pokemon },
   data() {
     return {
       pokemons: [],
@@ -40,36 +64,27 @@ export default {
   methods: {
     async fetchPokemonData(endpoint) {
       try {
-        const store = pokemonsStore(); 
-
-        // Vérifie si la recherche concerne un Pokémon unique ou une liste
         if (endpoint.startsWith("pokemon/")) {
           const response = await fetch(`https://pokeapi.co/api/v2/${endpoint}`);
-          if (!response.ok) {
-            throw new Error(`Erreur lors du chargement de ${endpoint}`);
-          }
+          if (!response.ok) throw new Error(`Erreur lors du chargement de ${endpoint}`);
+
           const detailsPoke = await response.json();
           this.pokemons = [this.formatPokemonData(detailsPoke)];
-          store.addPoke(this.pokemons);
         } else {
           this.endpoint = await getPoke(`${endpoint}`);
           this.pokemons = await Promise.all(
             this.endpoint.results.map(async (pokemon) => {
               const response = await fetch(pokemon.url);
-              if (!response.ok) {
-                throw new Error(`Erreur lors du chargement de ${pokemon.name}`);
-              }
+              if (!response.ok) throw new Error(`Erreur lors du chargement de ${pokemon.name}`);
+
               const detailsPoke = await response.json();
-              const pokemonFormated = this.formatPokemonData(detailsPoke)
-              store.addPoke(pokemonFormated);
-              return pokemonFormated;
+              return this.formatPokemonData(detailsPoke);
             })
           );
         }
       } catch (error) {
         console.error("Erreur lors de la récupération des Pokémon :", error);
       }
-      
     },
 
     formatPokemonData(detailsPoke) {
@@ -80,11 +95,13 @@ export default {
         image_artwork: detailsPoke.sprites.other.dream_world.front_default,
         image_default: detailsPoke.sprites.front_default,
         isShiny: false,
-        shiny_gif: detailsPoke.sprites.other.showdown.front_shiny,
+        shiny_gif: detailsPoke.sprites.other.home.front_shiny,
         price: detailsPoke.base_experience,
         stats: detailsPoke.stats,
         height: detailsPoke.height,
-        weight: detailsPoke.weight
+        weight: detailsPoke.weight,
+        types: detailsPoke.types,
+        allSprites: detailsPoke.sprites
       };
     },
 
@@ -112,41 +129,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.pokemon-container {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  padding: 20px;
-}
-
-.pokemon-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  margin: 20px auto;
-}
-
-.navigation {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 20px;
-}
-
-.nav-button {
-  background: #007bff;
-  color: #fff;
-  border: none;
-  padding: 10px 20px;
-  margin: 0 10px;
-  border-radius: 5px;
-  font-size: 18px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.nav-button:hover {
-  background: #0056b3;
-}
-</style>

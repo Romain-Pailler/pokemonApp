@@ -1,9 +1,8 @@
 <template>
   <nav class="relative">
-    <!-- Bande décorative supérieure -->
     <div class="h-1 bg-gradient-to-r from-yellow-400 via-red-500 to-yellow-400"></div>
     
-    <!-- Navbar principale -->
+    <!-- Navbar -->
     <div class="bg-[#DC0A2D] backdrop-blur-sm bg-opacity-95">
       <div class="container mx-auto px-4">
         <div class="flex items-center justify-between h-16">
@@ -21,14 +20,14 @@
             <span class="text-white font-bold text-xl tracking-tight">PokéShop</span>
           </router-link>
 
-          <!-- Navigation centrale -->
+          <!-- Navigation -->
           <div class="hidden md:flex items-center space-x-1">
             <router-link 
               v-for="item in ['Home', 'Cart', 'History']" 
               :key="item"
               :to="'/' + item"
               class="px-4 py-2 rounded-lg text-white font-medium transition-all duration-200 ease-in-out
-                     hover:bg-white/10 hover:scale-105 active:scale-95"
+                    hover:bg-white/10 hover:scale-105 active:scale-95"
               :class="{ 'bg-white/20': $route.path.includes(item.toLowerCase()) }"
             >
               {{ item }}
@@ -39,14 +38,14 @@
           <router-link 
             to="/cart" 
             class="relative group flex items-center justify-center w-12 h-12 rounded-full
-                   transition-all duration-200 hover:bg-white/10 active:scale-95"
+                  transition-all duration-200 hover:bg-white/10 active:scale-95"
           >
             <ShoppingCartIcon class="w-6 h-6 text-white" />
             <div 
               v-if="cart.count > 0"
               class="absolute -top-1 -right-1 w-6 h-6 flex items-center justify-center
-                     bg-yellow-400 text-[#DC0A2D] rounded-full text-sm font-bold
-                     transform transition-transform group-hover:scale-110 shadow-lg"
+                    bg-yellow-400 text-[#DC0A2D] rounded-full text-sm font-bold
+                    transform transition-transform group-hover:scale-110 shadow-lg"
             >
               {{ cart.count }}
             </div>

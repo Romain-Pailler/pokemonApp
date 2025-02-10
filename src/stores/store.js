@@ -37,7 +37,8 @@ export const cartStore = defineStore("cart", {
             this.orders.push({
                 id: Date.now(),
                 items:[...this.pokemons],
-                date: new Date().toLocaleTimeString()
+                date: new Date().toLocaleTimeString(),
+                price: this.pokemons.reduce((total, pokemon) => total + pokemon.price * pokemon.quantity, 0)
             });
             this.pokemons = [];
             this.count = 0;
